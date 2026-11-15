@@ -1,4 +1,4 @@
-package dev.luisnv.tracker.config;
+package dev.luisnv.tracker.infrastructure.henrik;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -6,7 +6,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestClient;
 
 @Configuration
-public class RestClientConfig {
+public class HenrikClientConfig {
 
     @Bean
     RestClient henrikRestClient(RestClient.Builder builder, HenrikProperties properties) {

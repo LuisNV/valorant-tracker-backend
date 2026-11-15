@@ -1,4 +1,4 @@
-package dev.luisnv.tracker.config;
+package dev.luisnv.tracker.infrastructure.henrik;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

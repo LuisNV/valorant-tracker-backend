@@ -1,23 +1,25 @@
-package dev.luisnv.tracker.player;
+package dev.luisnv.tracker.infrastructure.henrik;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import dev.luisnv.tracker.client.HenrikClient;
+import dev.luisnv.tracker.domain.model.Player;
+import dev.luisnv.tracker.domain.repository.PlayerGateway;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
-public class PlayerService {
+@Component
+public class HenrikPlayerGateway implements PlayerGateway {
 
     private final HenrikClient henrikClient;
 
-    public PlayerService(HenrikClient henrikClient) {
+    public HenrikPlayerGateway(HenrikClient henrikClient) {
         this.henrikClient = henrikClient;
     }
 
+    @Override
     @Cacheable(cacheNames = "players", key = "#name.toLowerCase() + '#' + #tag.toLowerCase()")
-    public PlayerProfileResponse getProfile(String name, String tag) {
+    public Player findByRiotId(String name, String tag) {
         JsonNode data = henrikClient.getAccount(name, tag);
-        return new PlayerProfileResponse(
+        return new Player(
                 data.path("puuid").asText(),
                 data.path("name").asText(name),
                 data.path("tag").asText(tag),

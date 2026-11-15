@@ -27,21 +27,29 @@ Chạy test (dùng H2, không cần Postgres): `mvn test`
 
 ## Cấu trúc
 
+Clean Architecture. Phụ thuộc chỉ hướng vào trong: presentation → application → domain ← infrastructure.
+
 ```
 src/main/java/dev/luisnv/tracker
-├── client/   HenrikClient: gọi API ngoài, trả về node "data"
-├── config/   HenrikProperties, RestClientConfig
-├── common/   Exception và GlobalExceptionHandler (ProblemDetail)
-├── player/   Controller, service, DTO hồ sơ
-└── match/    Entity, repository, service, controller trận đấu
+├── domain/           Java thuần, không phụ thuộc Spring hay JPA
+│   ├── model/            Player, Match
+│   ├── repository/       PlayerGateway, MatchRepository (interface, "port")
+│   └── exception/        PlayerNotFoundException, StatsProviderException
+├── application/      Use case: GetPlayerProfileUseCase, GetRecentMatchesUseCase
+├── infrastructure/   Hiện thực các port
+│   ├── henrik/           HenrikClient, HenrikPlayerGateway (có cache), cấu hình
+│   └── persistence/      MatchJpaEntity, MatchJpaRepository, JpaMatchRepository
+└── presentation/     PlayerController, GlobalExceptionHandler, dto/
 src/main/resources
 ├── application.yml
 └── db/migration/V1__create_matches.sql
 ```
 
+Use case dùng `@Service` của Spring cho gọn. Nếu muốn tầng application sạch hoàn toàn, bỏ annotation và khai báo bean trong một lớp `@Configuration`.
+
 ## Việc cần làm tiếp
 
 1. `HenrikClient`: thêm `getMatches` và `getMmr` (xem đường dẫn và tên trường ở https://docs.henrikdev.xyz).
-2. `MatchService.syncMatches`: kéo trận mới, bỏ qua trận đã lưu, ghi vào bảng `matches`.
+2. `SyncMatchesUseCase` + port `MatchGateway`: kéo trận mới, bỏ qua trận đã lưu, ghi vào bảng `matches`.
 3. Endpoint `/stats`: tính K/D, ACS, tỉ lệ thắng theo agent và map từ bảng `matches`.
 4. Giới hạn tốc độ gọi ra ngoài (key Basic: 30 request/phút), ví dụ bằng Bucket4j.

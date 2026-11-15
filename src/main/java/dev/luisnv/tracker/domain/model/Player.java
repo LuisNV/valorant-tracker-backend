@@ -1,6 +1,6 @@
-package dev.luisnv.tracker.player;
+package dev.luisnv.tracker.domain.model;
 
-public record PlayerProfileResponse(
+public record Player(
         String puuid,
         String name,
         String tag,

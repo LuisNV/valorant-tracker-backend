@@ -1,5 +1,6 @@
-package dev.luisnv.tracker.match;
+package dev.luisnv.tracker.presentation.dto;
 
+import dev.luisnv.tracker.domain.model.Match;
 import java.time.Instant;
 
 public record MatchSummaryResponse(
@@ -17,10 +18,10 @@ public record MatchSummaryResponse(
         Instant startedAt
 ) {
 
-    static MatchSummaryResponse from(MatchEntity m) {
+    public static MatchSummaryResponse from(Match m) {
         return new MatchSummaryResponse(
-                m.getMatchId(), m.getMap(), m.getMode(), m.getAgent(),
-                m.getKills(), m.getDeaths(), m.getAssists(), m.getScore(),
-                m.getRoundsWon(), m.getRoundsLost(), m.isWon(), m.getStartedAt());
+                m.matchId(), m.map(), m.mode(), m.agent(),
+                m.kills(), m.deaths(), m.assists(), m.score(),
+                m.roundsWon(), m.roundsLost(), m.won(), m.startedAt());
     }
 }

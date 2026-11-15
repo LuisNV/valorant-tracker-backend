@@ -1,15 +1,15 @@
-package dev.luisnv.tracker.client;
+package dev.luisnv.tracker.infrastructure.henrik;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import dev.luisnv.tracker.common.NotFoundException;
-import dev.luisnv.tracker.common.UpstreamException;
+import dev.luisnv.tracker.domain.exception.PlayerNotFoundException;
+import dev.luisnv.tracker.domain.exception.StatsProviderException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 /**
- * Thin wrapper around the unofficial HenrikDev Valorant API.
- * Returns the "data" node of each response; mapping to DTOs happens in the services.
+ * Thin HTTP wrapper around the unofficial HenrikDev Valorant API.
+ * Returns the "data" node of each response; the gateways map it to domain models.
  * Endpoint paths and response fields: https://docs.henrikdev.xyz
  */
 @Component
@@ -35,13 +35,13 @@ public class HenrikClient {
                 .onStatus(HttpStatusCode::isError, (request, response) -> {
                     int status = response.getStatusCode().value();
                     if (status == 404) {
-                        throw new NotFoundException("Player not found");
+                        throw new PlayerNotFoundException("Player not found");
                     }
-                    throw new UpstreamException(status, "Stats provider returned HTTP " + status);
+                    throw new StatsProviderException("Stats provider returned HTTP " + status, status == 429);
                 })
                 .body(JsonNode.class);
         if (body == null || body.path("data").isMissingNode()) {
-            throw new UpstreamException(502, "Stats provider returned an empty response");
+            throw new StatsProviderException("Stats provider returned an empty response", false);
         }
         return body.path("data");
     }
