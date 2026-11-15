@@ -27,23 +27,32 @@ Chạy test (dùng H2, không cần Postgres): `mvn test`
 
 ## Cấu trúc
 
-Clean Architecture. Phụ thuộc chỉ hướng vào trong: presentation → application → domain ← infrastructure.
+Chia theo tính năng, mỗi tính năng có đủ các tầng Clean Architecture.
+Trong một tính năng, phụ thuộc chỉ hướng vào trong: presentation → application → domain ← infrastructure.
 
 ```
 src/main/java/dev/luisnv/tracker
-├── domain/           Java thuần, không phụ thuộc Spring hay JPA
-│   ├── model/            Player, Match
-│   ├── repository/       PlayerGateway, MatchRepository (interface, "port")
-│   └── exception/        PlayerNotFoundException, StatsProviderException
-├── application/      Use case: GetPlayerProfileUseCase, GetRecentMatchesUseCase
-├── infrastructure/   Hiện thực các port
-│   ├── henrik/           HenrikClient, HenrikPlayerGateway (có cache), cấu hình
-│   └── persistence/      MatchJpaEntity, MatchJpaRepository, JpaMatchRepository
-└── presentation/     PlayerController, GlobalExceptionHandler, dto/
+├── player/
+│   ├── domain/           Player, PlayerGateway (port). Java thuần
+│   ├── application/      GetPlayerProfileUseCase
+│   ├── infrastructure/   HenrikPlayerGateway (có cache)
+│   └── presentation/     PlayerController, PlayerProfileResponse
+├── match/
+│   ├── domain/           Match, MatchRepository (port). Java thuần
+│   ├── application/      GetRecentMatchesUseCase
+│   ├── infrastructure/   MatchJpaEntity, MatchJpaRepository, JpaMatchRepository
+│   └── presentation/     MatchController, MatchSummaryResponse
+└── shared/           Dùng chung giữa các tính năng
+    ├── domain/exception/        NotFoundException, StatsProviderException
+    ├── infrastructure/henrik/   HenrikClient và cấu hình
+    └── presentation/            GlobalExceptionHandler
 src/main/resources
 ├── application.yml
 └── db/migration/V1__create_matches.sql
 ```
+
+Quy ước giữa các tính năng: một tính năng chỉ được dùng tầng `domain` của tính năng khác (ví dụ `match` dùng `player.domain.PlayerGateway`), không dùng `infrastructure` hay `presentation` của nhau.
+Thêm tính năng mới (ví dụ `stats`): tạo package cùng cấp với đủ 4 tầng như trên.
 
 Use case dùng `@Service` của Spring cho gọn. Nếu muốn tầng application sạch hoàn toàn, bỏ annotation và khai báo bean trong một lớp `@Configuration`.
 
